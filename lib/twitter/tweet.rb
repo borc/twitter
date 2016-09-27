@@ -7,10 +7,12 @@ module Twitter
     include Twitter::Creatable
     include Twitter::Entities
     # @return [String]
-    attr_reader :filter_level, :in_reply_to_screen_name, :lang, :source, :text
+    attr_reader :filter_level, :in_reply_to_screen_name, :lang, :source
     # @return [Integer]
     attr_reader :favorite_count, :in_reply_to_status_id, :in_reply_to_user_id,
                 :retweet_count
+    # @return [Array<Integer>]
+    attr_reader :display_text_range
     alias in_reply_to_tweet_id in_reply_to_status_id
     alias reply? in_reply_to_user_id?
     object_attr_reader :GeoFactory, :geo
@@ -24,6 +26,7 @@ module Twitter
     alias quoted_tweet quoted_status
     alias quote? quoted_status?
     alias quoted_tweet? quoted_status?
+    alias extended_mode? display_text_range?
     object_attr_reader :User, :user, :status
     predicate_attr_reader :favorited, :possibly_sensitive, :retweeted,
                           :truncated
@@ -46,5 +49,21 @@ module Twitter
     end
     memoize :uri
     alias url uri
+
+    # @return [String]
+    def text
+      if extended_mode?
+        @attrs[:full_text].send(:[], *display_text_range)
+      else
+        attr_falsey_or_empty?(:text) ? NullObject.new : @attrs[:text]
+      end
+    end
+    memoize :text
+
+    # @return [Boolean]
+    def text?
+      text.is_a?(String) && !text.empty?
+    end
+    memoize :text?
   end
 end
