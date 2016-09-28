@@ -31,6 +31,11 @@ module Twitter
     predicate_attr_reader :favorited, :possibly_sensitive, :retweeted,
                           :truncated
 
+    def to_h
+      attrs.merge(text: text)
+    end
+    alias to_hash to_h
+
     # @note May be > 140 characters.
     # @return [String]
     def full_text
